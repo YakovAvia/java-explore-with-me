@@ -11,6 +11,7 @@ COPY stats-service/stats-server/pom.xml stats-service/stats-server/
 
 COPY stats-service/stats-dto/src stats-service/stats-dto/src
 COPY stats-service/stats-client/src stats-service/stats-client/src
+COPY stats-service/stats-server/src stats-service/stats-server/src
 COPY main-explore/src main-explore/src
 
 RUN mvn clean install -pl main-explore -am -DskipTests
