@@ -1,6 +1,8 @@
 package ru.practicum.stats.client;
 
 import jakarta.annotation.Nullable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -16,20 +18,21 @@ public class BaseClient {
     }
 
     protected <T> ResponseEntity<Object> post(String path, T body) {
-        return post(path, body);
+        HttpEntity<T> requestEntity = new HttpEntity<>(body);
+        return makeResponse(path, HttpMethod.POST, null, requestEntity);
     }
 
-    protected <T> ResponseEntity<Object> get(String path, @Nullable Map<String, Object> param) {
-        return makeResponse(path, param);
+    protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> param) {
+        return makeResponse(path, HttpMethod.GET, param, null);
     }
 
-    private <T> ResponseEntity<Object> makeResponse(String path, @Nullable Map<String, Object> param) {
+    private <T> ResponseEntity<Object> makeResponse(String path, HttpMethod method, @Nullable Map<String, Object> param, @Nullable HttpEntity<T> requestEntity) {
         ResponseEntity<Object> shareitServerResponse;
         try {
             if (param != null) {
-                shareitServerResponse = restTemplate.exchange(path, null, null, Object.class, param);
+                shareitServerResponse = restTemplate.exchange(path, method, requestEntity, Object.class, param);
             } else {
-                shareitServerResponse = restTemplate.exchange(path, null, null, Object.class);
+                shareitServerResponse = restTemplate.exchange(path, method, requestEntity, Object.class);
             }
         } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
