@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface StatsRepository extends JpaRepository<ru.practicum.stats.server.model.EndpointHit, Long> {
 
-    @Query("SELECT new ru.practicum.server.stats.model.dto.ViewStatsDto(h.app, h.uri, COUNT(DISTINCT h.ip) as uniqueHits) " +
+    @Query("SELECT new ru.practicum.stats.dto.ViewStatsDto(h.app, h.uri, COUNT(DISTINCT h.ip) as uniqueHits) " +
             "FROM EndpointHit h " +
             "WHERE h.timestamp BETWEEN :start AND :end " +
             "AND (:uris IS NULL OR h.uri IN :uris) " +
@@ -20,7 +20,7 @@ public interface StatsRepository extends JpaRepository<ru.practicum.stats.server
                                         @Param("end") LocalDateTime end,
                                         @Param("uris") List<String> uris);
 
-    @Query("SELECT new ru.practicum.server.stats.model.dto.ViewStatsDto(h.app, h.uri, COUNT(h.ip) as hist) " +
+    @Query("SELECT new ru.practicum.stats.dto.ViewStatsDto(h.app, h.uri, COUNT(h.ip) as hist) " +
             "FROM EndpointHit h " +
             "WHERE h.timestamp BETWEEN :start AND :end " +
             "AND (:uris IS NULL OR h.uri IN :uris) " +
