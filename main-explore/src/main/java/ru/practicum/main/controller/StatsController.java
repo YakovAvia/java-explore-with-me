@@ -6,8 +6,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stats.client.HitClient;
-import ru.practicum.stats.dto.HitDto;
 import ru.practicum.stats.client.StatsClient;
+import ru.practicum.stats.dto.HitDto;
 
 import java.time.LocalDateTime;
 import java.util.List;

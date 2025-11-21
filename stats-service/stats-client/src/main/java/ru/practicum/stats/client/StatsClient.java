@@ -7,8 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import ru.practicum.stats.client.BaseClient;
-import ru.practicum.stats.dto.HitDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,7 +28,7 @@ public class StatsClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
-        Map<String,Object> param = Map.of(
+        Map<String, Object> param = Map.of(
                 "start", start,
                 "end", end,
                 "uris", uris,
