@@ -2,6 +2,7 @@ package ru.practicum.stats.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
@@ -20,7 +21,7 @@ public class HitDto {
     @NotBlank(message = "IP-адресс не может быть пустым")
     private String ip;
 
-    @NotBlank(message = "Дата и время не могут быть пустыми")
+    @NotNull(message = "Дата и время не могут быть пустыми")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
 

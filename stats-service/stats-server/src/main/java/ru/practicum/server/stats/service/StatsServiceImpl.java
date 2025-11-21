@@ -35,7 +35,7 @@ public class StatsServiceImpl implements StatsService {
         if (unique) {
             return repository.getStatsUniqueIp(start, end, uris);
         } else {
-            return repository.getStatsUnique(start, end, uris);
+            return repository.getStats(start, end, uris);
         }
     }
 }

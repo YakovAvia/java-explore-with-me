@@ -1,5 +1,6 @@
 package ru.practicum.server.stats.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,7 +23,7 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> createHit(@RequestBody HitDto hit) {
+    public ResponseEntity<?> createHit(@Valid @RequestBody HitDto hit) {
         log.info("Сохраняем запрос на сервере к эндпоинту!");
         service.createHit(hit);
         return ResponseEntity.ok("Информация сохранена!");
