@@ -1,14 +1,49 @@
+version: '3.8'
 services:
   stats-server:
+    build:
+      context: .
+      dockerfile: stats-service/stats-server/Dockerfile
     ports:
       - "9090:9090"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/catalogue
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    depends_on:
+      - stats-db
+    restart: on-failure
 
   stats-db:
     image: postgres:16.1
+    environment:
+      - POSTGRES_DB=catalogue
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5433:5432" # Expose on a different port to avoid conflict with ewm-db
 
   ewm-service:
+    build:
+      context: .
+      dockerfile: main-explore/Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm_db
+      - SPRING_DATASOURCE_USERNAME=ewm_user
+      - SPRING_DATASOURCE_PASSWORD=ewm_password
+      - SHAREIT_SERVER_URL=http://stats-server:9090 # Updated to use service name
+    depends_on:
+      - ewm-db
+      - stats-server
+    restart: on-failure
 
   ewm-db:
     image: postgres:16.1
+    environment:
+      - POSTGRES_DB=ewm_db
+      - POSTGRES_USER=ewm_user
+      - POSTGRES_PASSWORD=ewm_password
+    ports:
+      - "5432:5432"
