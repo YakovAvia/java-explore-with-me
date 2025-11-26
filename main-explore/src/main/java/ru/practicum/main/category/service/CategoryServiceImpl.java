@@ -9,6 +9,8 @@ import ru.practicum.main.category.dto.NewCategoryDto;
 import ru.practicum.main.category.mapper.CategoryMapper;
 import ru.practicum.main.category.model.Category;
 import ru.practicum.main.category.repository.CategoryRepository;
+import ru.practicum.main.event.repository.EventRepository;
+import ru.practicum.main.exception.DataIntegrityViolationException;
 import ru.practicum.main.exception.NotFoundException;
 
 import java.util.List;
@@ -19,6 +21,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     @Override
     @Transactional
@@ -33,8 +36,9 @@ public class CategoryServiceImpl implements CategoryService {
         if (!categoryRepository.existsById(catId)) {
             throw new NotFoundException("Category with id=" + catId + " was not found");
         }
-        // The spec says: "с категорией не должно быть связано ни одного события."
-        // I will add this check later when the Event entity is implemented.
+        if (eventRepository.existsByCategoryId(catId)) {
+            throw new DataIntegrityViolationException("The category is not empty");
+        }
         categoryRepository.deleteById(catId);
     }
 
