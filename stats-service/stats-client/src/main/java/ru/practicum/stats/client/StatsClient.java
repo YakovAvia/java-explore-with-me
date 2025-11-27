@@ -3,12 +3,15 @@ package ru.practicum.stats.client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
+import ru.practicum.stats.dto.ViewStatsDto;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +19,7 @@ import java.util.Map;
 public class StatsClient extends BaseClient {
 
     private static final String API_PREFIX = "/stats";
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     public StatsClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
@@ -27,13 +31,13 @@ public class StatsClient extends BaseClient {
         );
     }
 
-    public ResponseEntity<Object> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
+    public ResponseEntity<List<ViewStatsDto>> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         Map<String, Object> param = Map.of(
-                "start", start,
-                "end", end,
+                "start", start.format(FORMATTER),
+                "end", end.format(FORMATTER),
                 "uris", uris,
                 "unique", unique
         );
-        return get("", param);
+        return get("?start={start}&end={end}&uris={uris}&unique={unique}", param, new ParameterizedTypeReference<List<ViewStatsDto>>() {});
     }
 }

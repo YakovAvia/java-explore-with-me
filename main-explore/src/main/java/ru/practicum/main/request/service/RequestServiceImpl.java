@@ -3,17 +3,24 @@ package ru.practicum.main.request.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.main.event.dto.EventState;
 import ru.practicum.main.event.model.Event;
 import ru.practicum.main.event.repository.EventRepository;
+import ru.practicum.main.exception.DataIntegrityViolationException;
 import ru.practicum.main.exception.NotFoundException;
 import ru.practicum.main.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.main.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.main.request.dto.ParticipationRequestDto;
+import ru.practicum.main.request.dto.RequestStatus;
+import ru.practicum.main.request.dto.RequestStatusUpdate;
 import ru.practicum.main.request.mapper.RequestMapper;
 import ru.practicum.main.request.model.ParticipationRequest;
 import ru.practicum.main.request.repository.RequestRepository;
+import ru.practicum.main.user.model.User;
 import ru.practicum.main.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,16 +39,6 @@ public class RequestServiceImpl implements RequestService {
         }
         return RequestMapper.toParticipationRequestDto(requestRepository.findAllByRequesterId(userId));
     }
-
-import ru.practicum.main.event.dto.EventState;
-import ru.practicum.main.exception.DataIntegrityViolationException;
-import ru.practicum.main.request.dto.RequestStatus;
-import ru.practicum.main.user.model.User;
-
-import java.time.LocalDateTime;
-// ... other imports
-
-// ... inside RequestServiceImpl class
 
     @Override
     @Transactional
@@ -107,19 +104,13 @@ import java.time.LocalDateTime;
         }
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
-        
+
         if (!event.getInitiator().getId().equals(userId)) {
             throw new DataIntegrityViolationException("User is not the initiator of the event.");
         }
-        
+
         return RequestMapper.toParticipationRequestDto(requestRepository.findAllByEventId(eventId));
     }
-
-
-import ru.practicum.main.request.dto.RequestStatusUpdate;
-import java.util.ArrayList;
-
-//... inside RequestServiceImpl class
 
     @Override
     @Transactional
@@ -129,11 +120,11 @@ import java.util.ArrayList;
         }
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
-        
+
         if (!event.getInitiator().getId().equals(userId)) {
             throw new DataIntegrityViolationException("User is not the initiator of the event.");
         }
-        
+
         if (event.getParticipantLimit() == 0 || !event.getRequestModeration()) {
             // No approval needed
             return new EventRequestStatusUpdateResult(new ArrayList<>(), new ArrayList<>());
@@ -160,7 +151,7 @@ import java.util.ArrayList;
                 result.getRejectedRequests().add(RequestMapper.toParticipationRequestDto(request));
             }
         }
-        
+
         if (confirmedCount >= event.getParticipantLimit()) {
             requestRepository.findAllByEventId(eventId).stream()
                 .filter(r -> r.getStatus() == RequestStatus.PENDING)
@@ -169,7 +160,7 @@ import java.util.ArrayList;
                     result.getRejectedRequests().add(RequestMapper.toParticipationRequestDto(r));
                 });
         }
-        
+
         requestRepository.saveAll(requests);
         return result;
     }

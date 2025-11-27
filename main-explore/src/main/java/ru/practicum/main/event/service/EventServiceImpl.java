@@ -1,10 +1,10 @@
 package ru.practicum.main.event.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,7 @@ import ru.practicum.main.request.repository.RequestRepository;
 import ru.practicum.main.user.model.User;
 import ru.practicum.main.user.repository.UserRepository;
 import ru.practicum.stats.client.HitClient;
+import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.HitDto;
 import ru.practicum.stats.dto.ViewStatsDto;
 
@@ -39,13 +40,16 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
 
+    private static final LocalDateTime MIN_DATE = LocalDateTime.of(1970, 1, 1, 0, 0);
+
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final RequestRepository requestRepository;
     private final HitClient hitClient;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final StatsClient statsClient;
+    
 
 
     @Override
@@ -176,7 +180,7 @@ public class EventServiceImpl implements EventService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        List<Event> events = eventRepository.findAll(spec, PageRequest.of(from / size, size)).getContent();
+        List<Event> events = eventRepository.findAll(spec, PageRequest.of(from / size, size, Sort.by("eventDate"))).getContent();
         List<EventFullDto> dtos = EventMapper.toEventFullDto(events);
         enrichEvents(dtos);
         return dtos;
@@ -343,27 +347,49 @@ public class EventServiceImpl implements EventService {
 
             if (onlyAvailable != null && onlyAvailable) {
 
-                dtos = dtos.stream()
+    
 
-                    .filter(dto -> eventRepository.findById(dto.getId()).get().getParticipantLimit() == 0 ||
-
-                                    dto.getConfirmedRequests() < eventRepository.findById(dto.getId()).get().getParticipantLimit())
-
-                    .collect(Collectors.toList());
-
-            }
+                        dtos = dtos.stream()
 
     
 
-            if (sort != null && sort.equals("VIEWS")) {
+                            .filter(dto -> {
 
-                dtos.sort(Comparator.comparing(EventShortDto::getViews).reversed());
+    
 
-            } else { // default sort by EVENT_DATE
+                                Event event = events.stream().filter(e -> e.getId().equals(dto.getId())).findFirst().get();
 
-                dtos.sort(Comparator.comparing(EventShortDto::getEventDate));
+    
 
-            }
+                                return event.getParticipantLimit() == 0 || dto.getConfirmedRequests() < event.getParticipantLimit();
+
+    
+
+                            })
+
+    
+
+                            .collect(Collectors.toList());
+
+    
+
+                    }
+
+    
+
+            
+
+    
+
+                    if (sort != null && sort.equalsIgnoreCase("VIEWS")) {
+
+    
+
+                        dtos.sort(Comparator.comparing(EventShortDto::getViews).reversed());
+
+    
+
+                    }
 
     
 
@@ -402,10 +428,10 @@ public class EventServiceImpl implements EventService {
         LocalDateTime start = dtos.stream()
                 .map(EventShortDto::getEventDate)
                 .min(LocalDateTime::compareTo)
-                .orElse(LocalDateTime.now().minusYears(100));
+                .orElse(MIN_DATE);
 
-        ResponseEntity<Object> response = hitClient.getStats(start, LocalDateTime.now(), uris, true);
-        List<ViewStatsDto> viewStats = objectMapper.convertValue(response.getBody(), new TypeReference<>() {});
+        ResponseEntity<List<ViewStatsDto>> response = statsClient.getStats(start, LocalDateTime.now(), uris, true);
+        List<ViewStatsDto> viewStats = response.getBody();
 
         Map<Long, Long> viewsMap = viewStats.stream()
                 .collect(Collectors.toMap(
@@ -427,3 +453,4 @@ public class EventServiceImpl implements EventService {
         dtos.forEach(dto -> dto.setConfirmedRequests(confirmedRequestsMap.getOrDefault(dto.getId(), 0L)));
     }
 }
+

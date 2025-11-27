@@ -1,6 +1,6 @@
 package ru.practicum.main.exception;
 
-import org.springframework.dao.DataIntegrityViolationException as SpringDataIntegrityViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,7 +39,7 @@ public class ErrorHandler {
     
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleSpringDataIntegrityViolationException(final SpringDataIntegrityViolationException e) {
+    public ApiError handleSpringDataIntegrityViolationException(final org.springframework.dao.DataIntegrityViolationException e) {
         return new ApiError(
                 HttpStatus.CONFLICT,
                 "Integrity constraint has been violated.",
