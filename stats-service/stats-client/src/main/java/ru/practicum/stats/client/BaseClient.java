@@ -23,6 +23,9 @@ public class BaseClient {
     }
 
     protected <R> ResponseEntity<R> get(String path, @Nullable Map<String, Object> parameters, ParameterizedTypeReference<R> typeReference) {
+        if (parameters == null) {
+            parameters = Map.of();
+        }
         return restTemplate.exchange(path, HttpMethod.GET, null, typeReference, parameters);
     }
 
