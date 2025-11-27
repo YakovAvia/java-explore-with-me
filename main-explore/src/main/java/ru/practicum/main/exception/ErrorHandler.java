@@ -36,7 +36,7 @@ public class ErrorHandler {
                 LocalDateTime.now()
         );
     }
-    
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleSpringDataIntegrityViolationException(final org.springframework.dao.DataIntegrityViolationException e) {

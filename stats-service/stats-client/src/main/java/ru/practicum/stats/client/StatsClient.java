@@ -38,6 +38,7 @@ public class StatsClient extends BaseClient {
                 "uris", uris,
                 "unique", unique
         );
-        return get("?start={start}&end={end}&uris={uris}&unique={unique}", param, new ParameterizedTypeReference<List<ViewStatsDto>>() {});
+        return get("?start={start}&end={end}&uris={uris}&unique={unique}", param, new ParameterizedTypeReference<List<ViewStatsDto>>() {
+        });
     }
 }

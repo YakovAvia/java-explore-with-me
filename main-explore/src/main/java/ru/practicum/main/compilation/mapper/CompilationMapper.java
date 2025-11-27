@@ -6,9 +6,8 @@ import ru.practicum.main.compilation.model.Compilation;
 import ru.practicum.main.event.mapper.EventMapper;
 import ru.practicum.main.event.model.Event;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,7 @@ public class CompilationMapper {
                         .collect(Collectors.toSet())
         );
     }
-    
+
     public static List<CompilationDto> toCompilationDto(Iterable<Compilation> compilations) {
         List<CompilationDto> dtos = new ArrayList<>();
         for (Compilation compilation : compilations) {

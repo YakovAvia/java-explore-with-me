@@ -8,11 +8,7 @@ import ru.practicum.main.event.model.Event;
 import ru.practicum.main.event.repository.EventRepository;
 import ru.practicum.main.exception.DataIntegrityViolationException;
 import ru.practicum.main.exception.NotFoundException;
-import ru.practicum.main.request.dto.EventRequestStatusUpdateRequest;
-import ru.practicum.main.request.dto.EventRequestStatusUpdateResult;
-import ru.practicum.main.request.dto.ParticipationRequestDto;
-import ru.practicum.main.request.dto.RequestStatus;
-import ru.practicum.main.request.dto.RequestStatusUpdate;
+import ru.practicum.main.request.dto.*;
 import ru.practicum.main.request.mapper.RequestMapper;
 import ru.practicum.main.request.model.ParticipationRequest;
 import ru.practicum.main.request.repository.RequestRepository;
@@ -154,11 +150,11 @@ public class RequestServiceImpl implements RequestService {
 
         if (confirmedCount >= event.getParticipantLimit()) {
             requestRepository.findAllByEventId(eventId).stream()
-                .filter(r -> r.getStatus() == RequestStatus.PENDING)
-                .forEach(r -> {
-                    r.setStatus(RequestStatus.REJECTED);
-                    result.getRejectedRequests().add(RequestMapper.toParticipationRequestDto(r));
-                });
+                    .filter(r -> r.getStatus() == RequestStatus.PENDING)
+                    .forEach(r -> {
+                        r.setStatus(RequestStatus.REJECTED);
+                        result.getRejectedRequests().add(RequestMapper.toParticipationRequestDto(r));
+                    });
         }
 
         requestRepository.saveAll(requests);

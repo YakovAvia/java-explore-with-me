@@ -30,6 +30,7 @@ public class BaseClient {
     }
 
     protected ResponseEntity<Object> get(String path, @Nullable Map<String, Object> parameters) {
-        return get(path, parameters, new ParameterizedTypeReference<>() {});
+        return get(path, parameters, new ParameterizedTypeReference<>() {
+        });
     }
 }
