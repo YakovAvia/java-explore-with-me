@@ -25,7 +25,6 @@ public interface RequestRepository extends JpaRepository<ParticipationRequest, L
 
     interface ConfirmedRequests {
         Long getEventId();
-
         Long getConfirmedRequests();
     }
 }

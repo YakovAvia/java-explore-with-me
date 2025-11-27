@@ -1,6 +1,5 @@
 package ru.practicum.main.event.service;
 
-
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -48,7 +47,6 @@ public class EventServiceImpl implements EventService {
     private final RequestRepository requestRepository;
     private final HitClient hitClient;
     private final StatsClient statsClient;
-
 
     @Override
     public List<EventShortDto> getEventsByInitiator(Long userId, Integer from, Integer size) {
@@ -150,7 +148,6 @@ public class EventServiceImpl implements EventService {
                 event.setState(EventState.CANCELED);
             }
         }
-
         EventFullDto dto = EventMapper.toEventFullDto(eventRepository.save(event));
         enrichEvents(List.of(dto));
         return dto;
@@ -247,125 +244,60 @@ public class EventServiceImpl implements EventService {
         return dto;
     }
 
-
-    //... inside EventServiceImpl class
-
-
     @Override
-
     public List<EventShortDto> getPublishedEvents(String text, List<Long> categories, Boolean paid,
-
                                                   LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
-
                                                   String sort, Integer from, Integer size, String ip) {
-
-
         hitClient.createHit(new HitDto("ewm-main-service", "/events", ip, LocalDateTime.now()));
-
-
         Specification<Event> spec = (root, query, criteriaBuilder) -> {
-
             List<Predicate> predicates = new java.util.ArrayList<>();
-
             predicates.add(criteriaBuilder.equal(root.get("state"), EventState.PUBLISHED));
-
             if (text != null) {
-
                 predicates.add(criteriaBuilder.or(
-
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("annotation")), "%" + text.toLowerCase() + "%"),
-
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), "%" + text.toLowerCase() + "%")
-
                 ));
-
             }
-
             if (categories != null && !categories.isEmpty()) {
-
                 predicates.add(root.get("category").get("id").in(categories));
-
             }
-
             if (paid != null) {
-
                 predicates.add(criteriaBuilder.equal(root.get("paid"), paid));
-
             }
-
             if (rangeStart != null) {
-
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
-
             }
-
             if (rangeEnd != null) {
-
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("eventDate"), rangeEnd));
-
             }
-
             if (rangeStart == null && rangeEnd == null) {
-
                 predicates.add(criteriaBuilder.greaterThan(root.get("eventDate"), LocalDateTime.now()));
-
             }
-
             if (onlyAvailable != null && onlyAvailable) {
-
                 // This logic is tricky with a simple query. A subquery or join would be better.
-
                 // For now, I will filter in memory, but this is not optimal.
-
             }
-
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
-
         };
 
-
         List<Event> events = eventRepository.findAll(spec, PageRequest.of(from / size, size)).getContent();
-
         List<EventShortDto> dtos = EventMapper.toEventShortDto(events);
-
         enrichEvents(dtos);
 
-
         if (onlyAvailable != null && onlyAvailable) {
-
-
             dtos = dtos.stream()
-
-
                     .filter(dto -> {
-
-
                         Event event = events.stream().filter(e -> e.getId().equals(dto.getId())).findFirst().get();
-
-
                         return event.getParticipantLimit() == 0 || dto.getConfirmedRequests() < event.getParticipantLimit();
-
-
                     })
-
-
                     .collect(Collectors.toList());
-
-
         }
-
 
         if (sort != null && sort.equalsIgnoreCase("VIEWS")) {
-
-
             dtos.sort(Comparator.comparing(EventShortDto::getViews).reversed());
-
-
         }
 
-
         return dtos;
-
     }
 
     @Override
@@ -375,9 +307,7 @@ public class EventServiceImpl implements EventService {
         if (event.getState() != EventState.PUBLISHED) {
             throw new NotFoundException("Event with id=" + eventId + " was not found");
         }
-
         hitClient.createHit(new HitDto("ewm-main-service", "/events/" + eventId, ip, LocalDateTime.now()));
-
         EventFullDto dto = EventMapper.toEventFullDto(event);
         enrichEvents(List.of(dto));
         return dto;
@@ -424,4 +354,3 @@ public class EventServiceImpl implements EventService {
         dtos.forEach(dto -> dto.setConfirmedRequests(confirmedRequestsMap.getOrDefault(dto.getId(), 0L)));
     }
 }
-

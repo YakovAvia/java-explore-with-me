@@ -13,7 +13,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CategoryDto {
     private Long id;
-
     @NotBlank
     @Size(min = 1, max = 50)
     private String name;

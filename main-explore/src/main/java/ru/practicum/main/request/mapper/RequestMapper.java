@@ -16,7 +16,6 @@ public class RequestMapper {
                 request.getCreated()
         );
     }
-
     public static List<ParticipationRequestDto> toParticipationRequestDto(Iterable<ParticipationRequest> requests) {
         List<ParticipationRequestDto> dtos = new ArrayList<>();
         for (ParticipationRequest request : requests) {
