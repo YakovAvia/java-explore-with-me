@@ -31,10 +31,9 @@ public class CompilationMapper {
                         .map(EventMapper::toEventShortDto)
                         .collect(Collectors.toSet())
         );
-    }
-
-    public static List<CompilationDto> toCompilationDto(Iterable<Compilation> compilations) {
-        List<CompilationDto> dtos = new ArrayList<>();
+        }
+    
+        public static List<CompilationDto> toCompilationDto(Iterable<Compilation> compilations) {        List<CompilationDto> dtos = new ArrayList<>();
         for (Compilation compilation : compilations) {
             dtos.add(toCompilationDto(compilation));
         }
