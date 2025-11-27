@@ -37,17 +37,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleSpringDataIntegrityViolationException(final org.springframework.dao.DataIntegrityViolationException e) {
-        return new ApiError(
-                HttpStatus.CONFLICT,
-                "Integrity constraint has been violated.",
-                e.getMessage(),
-                Collections.emptyList(),
-                LocalDateTime.now()
-        );
-    }
+
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
