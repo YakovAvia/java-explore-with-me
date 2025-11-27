@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class EventFullDto {
+public class EventFullDto implements EnrichableEventDto {
     private Long id;
     private String title;
     private String annotation;

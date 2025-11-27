@@ -26,6 +26,7 @@ import ru.practicum.main.user.repository.UserRepository;
 import ru.practicum.stats.client.HitClient;
 import ru.practicum.stats.client.StatsClient;
 import ru.practicum.stats.dto.HitDto;
+import ru.practicum.main.location.mapper.LocationMapper;
 import ru.practicum.stats.dto.ViewStatsDto;
 
 import java.time.LocalDateTime;
@@ -34,6 +35,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Comparator;
+import ru.practicum.stats.dto.HitDto;
 
 @Service
 @RequiredArgsConstructor
@@ -76,7 +79,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("Category with id=" + newEventDto.getCategory() + " was not found"));
 
         Location location = locationRepository.findByLatAndLon(newEventDto.getLocation().getLat(), newEventDto.getLocation().getLon())
-                .orElseGet(() -> locationRepository.save(EventMapper.toLocation(newEventDto.getLocation())));
+                .orElseGet(() -> locationRepository.save(LocationMapper.toLocation(newEventDto.getLocation())));
 
         Event event = EventMapper.toEvent(newEventDto, category, initiator, LocalDateTime.now());
         event.setLocation(location);
@@ -211,7 +214,7 @@ public class EventServiceImpl implements EventService {
         }
         if (updateRequest.getLocation() != null) {
             Location location = locationRepository.findByLatAndLon(updateRequest.getLocation().getLat(), updateRequest.getLocation().getLon())
-                .orElseGet(() -> locationRepository.save(EventMapper.toLocation(updateRequest.getLocation())));
+                .orElseGet(() -> locationRepository.save(LocationMapper.toLocation(updateRequest.getLocation())));
             event.setLocation(location);
         }
         if (updateRequest.getPaid() != null) {
@@ -248,12 +251,6 @@ public class EventServiceImpl implements EventService {
         enrichEvents(List.of(dto));
         return dto;
     }
-
-    
-
-    import ru.practicum.stats.dto.HitDto;
-
-    import java.util.Comparator;
 
     
 
@@ -412,12 +409,12 @@ public class EventServiceImpl implements EventService {
         return dto;
     }
 
-    private void enrichEvents(List<? extends EventShortDto> dtos) {
+    private <T extends EnrichableEventDto> void enrichEvents(List<T> dtos) {
         enrichWithViews(dtos);
         enrichWithConfirmedRequests(dtos);
     }
 
-    private void enrichWithViews(List<? extends EventShortDto> dtos) {
+    private <T extends EnrichableEventDto> void enrichWithViews(List<T> dtos) {
         if (dtos == null || dtos.isEmpty()) {
             return;
         }
@@ -426,7 +423,7 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
 
         LocalDateTime start = dtos.stream()
-                .map(EventShortDto::getEventDate)
+                .map(T::getEventDate)
                 .min(LocalDateTime::compareTo)
                 .orElse(MIN_DATE);
 
@@ -442,11 +439,11 @@ public class EventServiceImpl implements EventService {
         dtos.forEach(dto -> dto.setViews(viewsMap.getOrDefault(dto.getId(), 0L)));
     }
 
-    private void enrichWithConfirmedRequests(List<? extends EventShortDto> dtos) {
+    private <T extends EnrichableEventDto> void enrichWithConfirmedRequests(List<T> dtos) {
         if (dtos == null || dtos.isEmpty()) {
             return;
         }
-        List<Long> eventIds = dtos.stream().map(EventShortDto::getId).collect(Collectors.toList());
+        List<Long> eventIds = dtos.stream().map(T::getId).collect(Collectors.toList());
         Map<Long, Long> confirmedRequestsMap = requestRepository.countConfirmedRequestsForEvents(eventIds).stream()
                 .collect(Collectors.toMap(RequestRepository.ConfirmedRequests::getEventId, RequestRepository.ConfirmedRequests::getConfirmedRequests));
 
