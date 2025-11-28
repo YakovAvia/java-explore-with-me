@@ -331,20 +331,8 @@ public class EventServiceImpl implements EventService {
 
         LocalDateTime start = MIN_DATE;
 
-        List<ViewStatsDto> viewStats = null;
-        for (int i = 0; i < 5; i++) {
-            ResponseEntity<List<ViewStatsDto>> response = statsClient.getStats(start, LocalDateTime.now().plusSeconds(1), uris, true);
-            viewStats = response.getBody();
-            if (viewStats != null && !viewStats.isEmpty() && viewStats.get(0).getHits() > 0) {
-                break;
-            }
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-
+        ResponseEntity<List<ViewStatsDto>> response = statsClient.getStats(start, LocalDateTime.now(), uris, true);
+        List<ViewStatsDto> viewStats = response.getBody();
 
         if (viewStats != null) {
             Map<Long, Long> viewsMap = viewStats.stream()
