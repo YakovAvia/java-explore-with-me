@@ -23,11 +23,6 @@ public class StatsServiceImpl implements StatsService {
     @Override
     @Transactional
     public void createHit(HitDto body) {
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         repository.save(HitMapper.toHit(body));
     }
 
@@ -38,8 +33,14 @@ public class StatsServiceImpl implements StatsService {
         }
 
         if (unique) {
+            if (uris == null || uris.isEmpty()) {
+                return repository.getStatsUniqueIpAllUris(start, end);
+            }
             return repository.getStatsUniqueIp(start, end, uris);
         } else {
+            if (uris == null || uris.isEmpty()) {
+                return repository.getStatsAllUris(start, end);
+            }
             return repository.getStats(start, end, uris);
         }
     }
