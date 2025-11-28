@@ -62,9 +62,7 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
-        if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new DataIntegrityViolationException("Field: eventDate. Error: должно содержать дату, которая еще не наступила. Value: " + newEventDto.getEventDate());
-        }
+
 
         User initiator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
@@ -121,9 +119,6 @@ public class EventServiceImpl implements EventService {
             event.setDescription(updateRequest.getDescription());
         }
         if (updateRequest.getEventDate() != null) {
-            if (updateRequest.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-                throw new DataIntegrityViolationException("Event date must be at least 2 hours in the future.");
-            }
             event.setEventDate(updateRequest.getEventDate());
         }
         if (updateRequest.getLocation() != null) {
