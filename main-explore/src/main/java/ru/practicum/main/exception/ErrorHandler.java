@@ -53,26 +53,26 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-        public ApiError handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
-            return new ApiError(
-                    HttpStatus.BAD_REQUEST,
-                    "Incorrectly made request.",
-                    e.getBindingResult().getAllErrors().get(0).getDefaultMessage(),
-                    Collections.emptyList(),
-                    LocalDateTime.now()
-            );
-        }
-    
-        @ExceptionHandler
-        @ResponseStatus(HttpStatus.BAD_REQUEST)
-        public ApiError handleMissingServletRequestParameterException(final MissingServletRequestParameterException e) {
-            return new ApiError(
-                    HttpStatus.BAD_REQUEST,
-                    "Incorrectly made request.",
-                    e.getMessage(),
-                    Collections.emptyList(),
-                    LocalDateTime.now()
-            );
-        }
+    public ApiError handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
+        return new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "Incorrectly made request.",
+                e.getBindingResult().getAllErrors().get(0).getDefaultMessage(),
+                Collections.emptyList(),
+                LocalDateTime.now()
+        );
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleMissingServletRequestParameterException(final MissingServletRequestParameterException e) {
+        return new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "Incorrectly made request.",
+                e.getMessage(),
+                Collections.emptyList(),
+                LocalDateTime.now()
+        );
+    }
+}
     
