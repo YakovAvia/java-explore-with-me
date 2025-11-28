@@ -327,7 +327,7 @@ public class EventServiceImpl implements EventService {
 
         LocalDateTime start = MIN_DATE;
 
-        ResponseEntity<List<ViewStatsDto>> response = statsClient.getStats(start, LocalDateTime.now(), uris, true);
+        ResponseEntity<List<ViewStatsDto>> response = statsClient.getStats(start, LocalDateTime.now().plusSeconds(1), uris, true);
         List<ViewStatsDto> viewStats = response.getBody();
 
         if (viewStats != null) {
