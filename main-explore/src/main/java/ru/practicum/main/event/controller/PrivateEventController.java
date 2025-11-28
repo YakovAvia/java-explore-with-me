@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.main.event.dto.EventFullDto;
@@ -12,18 +13,15 @@ import ru.practicum.main.event.dto.EventShortDto;
 import ru.practicum.main.event.dto.NewEventDto;
 import ru.practicum.main.event.dto.UpdateEventUserRequest;
 import ru.practicum.main.event.service.EventService;
+import ru.practicum.main.exception.ApiError;
 import ru.practicum.main.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.main.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.main.request.dto.ParticipationRequestDto;
 import ru.practicum.main.request.service.RequestService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ru.practicum.main.exception.ApiError;
-import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users/{userId}/events")
@@ -31,27 +29,22 @@ import java.util.ArrayList;
 @Validated
 public class PrivateEventController {
 
-    private static final Logger log = LoggerFactory.getLogger(PrivateEventController.class);
-
     private final EventService eventService;
     private final RequestService requestService;
 
     @GetMapping
     public ResponseEntity<Object> getEventsByInitiator(@PathVariable Long userId,
-                                                    @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                                    @RequestParam(defaultValue = "10") @Positive Integer size) {
+                                                       @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
+                                                       @RequestParam(defaultValue = "10") @Positive Integer size) {
         try {
             List<EventShortDto> events = eventService.getEventsByInitiator(userId, from, size);
             return ResponseEntity.ok(events);
         } catch (Exception e) {
-            log.error("Error in getEventsByInitiator for userId: {}, from: {}, size: {}", userId, from, size, e);
-
             List<String> stackTrace = new ArrayList<>();
             stackTrace.add(e.getClass().getName() + ": " + e.getMessage());
             for (StackTraceElement element : e.getStackTrace()) {
                 stackTrace.add(element.toString());
             }
-
             ApiError apiError = new ApiError(
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "An unexpected error occurred while fetching events.",
