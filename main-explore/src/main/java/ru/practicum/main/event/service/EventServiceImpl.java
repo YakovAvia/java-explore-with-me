@@ -53,7 +53,7 @@ public class EventServiceImpl implements EventService {
         if (!userRepository.existsById(userId)) {
             throw new NotFoundException("User with id=" + userId + " was not found");
         }
-        List<Event> events = eventRepository.findAllByInitiatorId(userId, PageRequest.of(from / size, size));
+        List<Event> events = eventRepository.findAllByInitiatorId(userId, PageRequest.of(from, size));
         List<EventShortDto> dtos = EventMapper.toEventShortDto(events);
         enrichEvents(dtos);
         return dtos;
