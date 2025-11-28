@@ -331,6 +331,11 @@ public class EventServiceImpl implements EventService {
                 .min(LocalDateTime::compareTo)
                 .orElse(MIN_DATE);
 
+        // Ensure 'start' is not after 'end' (LocalDateTime.now())
+        if (start.isAfter(LocalDateTime.now())) {
+            start = LocalDateTime.now();
+        }
+
         ResponseEntity<List<ViewStatsDto>> response = statsClient.getStats(start, LocalDateTime.now(), uris, true);
         List<ViewStatsDto> viewStats = response.getBody();
 
