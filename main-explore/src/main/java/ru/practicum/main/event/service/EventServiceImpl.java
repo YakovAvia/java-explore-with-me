@@ -14,6 +14,7 @@ import ru.practicum.main.event.dto.*;
 import ru.practicum.main.event.mapper.EventMapper;
 import ru.practicum.main.event.model.Event;
 import ru.practicum.main.event.repository.EventRepository;
+import ru.practicum.main.exception.BadRequestException;
 import ru.practicum.main.exception.DataIntegrityViolationException;
 import ru.practicum.main.exception.NotFoundException;
 import ru.practicum.main.location.mapper.LocationMapper;
@@ -243,6 +244,9 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getPublishedEvents(String text, List<Long> categories, Boolean paid,
                                                   LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
                                                   String sort, Integer from, Integer size, String ip) {
+        if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
+            throw new BadRequestException("The start of the range cannot be after the end of the range.");
+        }
         hitClient.createHit(new HitDto("ewm-main-service", "/events", ip, LocalDateTime.now()));
         Specification<Event> spec = (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new java.util.ArrayList<>();
@@ -321,15 +325,7 @@ public class EventServiceImpl implements EventService {
                 .map(dto -> "/events/" + dto.getId())
                 .collect(Collectors.toList());
 
-        LocalDateTime start = dtos.stream()
-                .map(T::getEventDate)
-                .min(LocalDateTime::compareTo)
-                .orElse(MIN_DATE);
-
-        // Ensure 'start' is not after 'end' (LocalDateTime.now())
-        if (start.isAfter(LocalDateTime.now())) {
-            start = LocalDateTime.now();
-        }
+        LocalDateTime start = MIN_DATE;
 
         ResponseEntity<List<ViewStatsDto>> response = statsClient.getStats(start, LocalDateTime.now(), uris, true);
         List<ViewStatsDto> viewStats = response.getBody();
