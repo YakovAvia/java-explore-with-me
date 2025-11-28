@@ -334,13 +334,14 @@ public class EventServiceImpl implements EventService {
         ResponseEntity<List<ViewStatsDto>> response = statsClient.getStats(start, LocalDateTime.now(), uris, true);
         List<ViewStatsDto> viewStats = response.getBody();
 
-        Map<Long, Long> viewsMap = viewStats.stream()
-                .collect(Collectors.toMap(
-                        stat -> Long.parseLong(stat.getUri().substring("/events/".length())),
-                        ViewStatsDto::getHits
-                ));
-
-        dtos.forEach(dto -> dto.setViews(viewsMap.getOrDefault(dto.getId(), 0L)));
+        if (viewStats != null) {
+            Map<Long, Long> viewsMap = viewStats.stream()
+                    .collect(Collectors.toMap(
+                            stat -> Long.parseLong(stat.getUri().substring("/events/".length())),
+                            ViewStatsDto::getHits
+                    ));
+            dtos.forEach(dto -> dto.setViews(viewsMap.getOrDefault(dto.getId(), 0L)));
+        }
     }
 
     private <T extends EnrichableEventDto> void enrichWithConfirmedRequests(List<T> dtos) {
