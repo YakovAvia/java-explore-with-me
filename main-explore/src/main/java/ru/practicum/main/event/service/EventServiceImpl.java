@@ -1,6 +1,8 @@
 package ru.practicum.main.event.service;
 
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -20,6 +22,8 @@ import ru.practicum.main.exception.NotFoundException;
 import ru.practicum.main.location.mapper.LocationMapper;
 import ru.practicum.main.location.model.Location;
 import ru.practicum.main.location.repository.LocationRepository;
+import ru.practicum.main.request.dto.RequestStatus;
+import ru.practicum.main.request.model.ParticipationRequest;
 import ru.practicum.main.request.repository.RequestRepository;
 import ru.practicum.main.user.model.User;
 import ru.practicum.main.user.repository.UserRepository;
@@ -273,8 +277,17 @@ public class EventServiceImpl implements EventService {
                 predicates.add(criteriaBuilder.greaterThan(root.get("eventDate"), LocalDateTime.now()));
             }
             if (onlyAvailable != null && onlyAvailable) {
-                // This logic is tricky with a simple query. A subquery or join would be better.
-                // For now, I will filter in memory, but this is not optimal.
+                Subquery<Long> subquery = query.subquery(Long.class);
+                Root<ParticipationRequest> subRoot = subquery.from(ParticipationRequest.class);
+                subquery.select(criteriaBuilder.count(subRoot.get("id")));
+                subquery.where(
+                        criteriaBuilder.equal(subRoot.get("event").get("id"), root.get("id")),
+                        criteriaBuilder.equal(subRoot.get("status"), RequestStatus.CONFIRMED)
+                );
+                predicates.add(criteriaBuilder.or(
+                        criteriaBuilder.equal(root.get("participantLimit"), 0),
+                        criteriaBuilder.greaterThan(root.get("participantLimit"), subquery)
+                ));
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
@@ -282,15 +295,6 @@ public class EventServiceImpl implements EventService {
         List<Event> events = eventRepository.findAll(spec, PageRequest.of(from / size, size)).getContent();
         List<EventShortDto> dtos = EventMapper.toEventShortDto(events);
         enrichEvents(dtos);
-
-        if (onlyAvailable != null && onlyAvailable) {
-            dtos = dtos.stream()
-                    .filter(dto -> {
-                        Event event = events.stream().filter(e -> e.getId().equals(dto.getId())).findFirst().get();
-                        return event.getParticipantLimit() == 0 || dto.getConfirmedRequests() < event.getParticipantLimit();
-                    })
-                    .collect(Collectors.toList());
-        }
 
         if (sort != null && sort.equalsIgnoreCase("VIEWS")) {
             dtos.sort(Comparator.comparing(EventShortDto::getViews).reversed());
@@ -328,14 +332,14 @@ public class EventServiceImpl implements EventService {
         LocalDateTime start = MIN_DATE;
 
         List<ViewStatsDto> viewStats = null;
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             ResponseEntity<List<ViewStatsDto>> response = statsClient.getStats(start, LocalDateTime.now().plusSeconds(1), uris, true);
             viewStats = response.getBody();
-            if (viewStats != null && !viewStats.isEmpty()) {
+            if (viewStats != null && !viewStats.isEmpty() && viewStats.get(0).getHits() > 0) {
                 break;
             }
             try {
-                Thread.sleep(100);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
