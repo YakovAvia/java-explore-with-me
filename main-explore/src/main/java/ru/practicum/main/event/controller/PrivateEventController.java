@@ -16,6 +16,8 @@ import ru.practicum.main.request.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.main.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.main.request.dto.ParticipationRequestDto;
 import ru.practicum.main.request.service.RequestService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -25,6 +27,8 @@ import java.util.List;
 @Validated
 public class PrivateEventController {
 
+    private static final Logger log = LoggerFactory.getLogger(PrivateEventController.class);
+
     private final EventService eventService;
     private final RequestService requestService;
 
@@ -32,7 +36,12 @@ public class PrivateEventController {
     public List<EventShortDto> getEventsByInitiator(@PathVariable Long userId,
                                                     @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                                     @RequestParam(defaultValue = "10") @Positive Integer size) {
-        return eventService.getEventsByInitiator(userId, from, size);
+        try {
+            return eventService.getEventsByInitiator(userId, from, size);
+        } catch (Exception e) {
+            log.error("Error in getEventsByInitiator for userId: {}, from: {}, size: {}", userId, from, size, e);
+            throw e;
+        }
     }
 
     @PostMapping
