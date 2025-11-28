@@ -18,8 +18,12 @@ import ru.practicum.main.request.dto.ParticipationRequestDto;
 import ru.practicum.main.request.service.RequestService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.practicum.main.exception.ApiError;
+import org.springframework.http.ResponseEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/users/{userId}/events")
@@ -33,14 +37,29 @@ public class PrivateEventController {
     private final RequestService requestService;
 
     @GetMapping
-    public List<EventShortDto> getEventsByInitiator(@PathVariable Long userId,
+    public ResponseEntity<Object> getEventsByInitiator(@PathVariable Long userId,
                                                     @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
                                                     @RequestParam(defaultValue = "10") @Positive Integer size) {
         try {
-            return eventService.getEventsByInitiator(userId, from, size);
+            List<EventShortDto> events = eventService.getEventsByInitiator(userId, from, size);
+            return ResponseEntity.ok(events);
         } catch (Exception e) {
             log.error("Error in getEventsByInitiator for userId: {}, from: {}, size: {}", userId, from, size, e);
-            throw e;
+
+            List<String> stackTrace = new ArrayList<>();
+            stackTrace.add(e.getClass().getName() + ": " + e.getMessage());
+            for (StackTraceElement element : e.getStackTrace()) {
+                stackTrace.add(element.toString());
+            }
+
+            ApiError apiError = new ApiError(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "An unexpected error occurred while fetching events.",
+                    e.getMessage(),
+                    stackTrace, // Pass the stack trace here
+                    LocalDateTime.now()
+            );
+            return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
