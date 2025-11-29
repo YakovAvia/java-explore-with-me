@@ -29,7 +29,7 @@ public class StatsServiceImpl implements StatsService {
     @Override
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
         if (start.isAfter(end)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Start date cannot be after end date.");
         }
 
         if (unique) {
