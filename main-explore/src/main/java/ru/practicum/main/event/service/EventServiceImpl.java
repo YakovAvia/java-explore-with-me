@@ -313,6 +313,7 @@ public class EventServiceImpl implements EventService {
         hitClient.createHit(new HitDto("ewm-main-service", "/events/" + eventId, ip, LocalDateTime.now()));
         EventFullDto dto = EventMapper.toEventFullDto(event);
         enrichEvents(List.of(dto));
+        enrichWithViews(List.of(dto));
         return dto;
     }
 
