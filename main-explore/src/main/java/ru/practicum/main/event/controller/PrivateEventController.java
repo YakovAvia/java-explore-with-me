@@ -49,7 +49,7 @@ public class PrivateEventController {
                     HttpStatus.INTERNAL_SERVER_ERROR,
                     "An unexpected error occurred while fetching events.",
                     e.getMessage(),
-                    stackTrace, // Pass the stack trace here
+                    stackTrace,
                     LocalDateTime.now()
             );
             return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);

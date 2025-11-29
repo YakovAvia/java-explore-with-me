@@ -53,8 +53,8 @@ public class EventMapper {
                 event.getState(),
                 event.getCreatedOn(),
                 event.getPublishedOn(),
-                0L, // placeholder for confirmedRequests
-                0L  // placeholder for views
+                0L,
+                0L
         );
     }
 
@@ -67,8 +67,8 @@ public class EventMapper {
                 event.getEventDate(),
                 UserMapper.toUserShortDto(event.getInitiator()),
                 event.getPaid(),
-                0L, // placeholder for confirmedRequests
-                0L  // placeholder for views
+                0L,
+                0L
         );
     }
 
