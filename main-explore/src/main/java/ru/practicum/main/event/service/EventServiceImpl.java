@@ -67,7 +67,9 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
-
+        if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new DataIntegrityViolationException("Event date must be at least 2 hours in the future.");
+        }
 
         User initiator = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id=" + userId + " was not found"));
@@ -292,7 +294,14 @@ public class EventServiceImpl implements EventService {
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
 
-        List<Event> events = eventRepository.findAll(spec, PageRequest.of(from / size, size)).getContent();
+        PageRequest pageRequest;
+        if (sort != null && sort.equalsIgnoreCase("VIEWS")) {
+            pageRequest = PageRequest.of(from / size, size);
+        } else {
+            pageRequest = PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "eventDate"));
+        }
+
+        List<Event> events = eventRepository.findAll(spec, pageRequest).getContent();
         List<EventShortDto> dtos = EventMapper.toEventShortDto(events);
         enrichEvents(dtos);
 
@@ -300,7 +309,7 @@ public class EventServiceImpl implements EventService {
             dtos.sort(Comparator.comparing(EventShortDto::getViews).reversed());
         }
 
-        return dtos;
+            return dtos;
     }
 
     @Override
