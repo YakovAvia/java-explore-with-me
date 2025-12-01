@@ -1,4 +1,4 @@
-version: '3.8'
+
 services:
   stats-server:
     build:
@@ -33,7 +33,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm_db
       - SPRING_DATASOURCE_USERNAME=ewm_user
       - SPRING_DATASOURCE_PASSWORD=ewm_password
-      - SHAREIT_SERVER_URL=http://stats-server:9090 # Updated to use service name
+      - STATS_SERVER_URL=http://stats-server:9090 # Updated to use service name
     depends_on:
       - ewm-db
       - stats-server

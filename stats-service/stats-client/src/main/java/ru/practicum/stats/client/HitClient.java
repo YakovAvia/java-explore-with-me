@@ -15,7 +15,7 @@ public class HitClient extends BaseClient {
     private static final String API_PREFIX = "/hit";
 
     @Autowired
-    public HitClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    public HitClient(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))

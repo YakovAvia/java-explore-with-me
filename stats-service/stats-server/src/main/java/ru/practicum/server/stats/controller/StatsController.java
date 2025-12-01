@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.server.stats.service.StatsService;
 import ru.practicum.stats.dto.HitDto;
@@ -23,10 +22,9 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> createHit(@Valid @RequestBody HitDto hit) {
+    public void createHit(@Valid @RequestBody HitDto hit) {
         log.info("Сохраняем запрос на сервере к эндпоинту!");
         service.createHit(hit);
-        return ResponseEntity.ok("Информация сохранена!");
     }
 
     @GetMapping("/stats")

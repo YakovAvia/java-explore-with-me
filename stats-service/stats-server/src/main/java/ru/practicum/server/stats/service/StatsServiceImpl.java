@@ -29,12 +29,18 @@ public class StatsServiceImpl implements StatsService {
     @Override
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
         if (start.isAfter(end)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Start date cannot be after end date.");
         }
 
         if (unique) {
+            if (uris == null || uris.isEmpty()) {
+                return repository.getStatsUniqueIpAllUris(start, end);
+            }
             return repository.getStatsUniqueIp(start, end, uris);
         } else {
+            if (uris == null || uris.isEmpty()) {
+                return repository.getStatsAllUris(start, end);
+            }
             return repository.getStats(start, end, uris);
         }
     }
