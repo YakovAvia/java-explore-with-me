@@ -1,6 +1,7 @@
 package ru.practicum.main.comment.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.main.comment.dto.CommentDto;
@@ -43,7 +44,11 @@ public class CommentServiceImpl implements CommentService {
         if (!eventRepository.existsById(eventId)) {
             throw new NotFoundException("Event with id=" + eventId + " was not found");
         }
-        return commentRepository.findAllByEventId(eventId).stream()
+
+        return commentRepository.findAllByEventId(
+                        eventId,
+                        Sort.by(Sort.Direction.DESC, "createdAt")
+                ).stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
     }
